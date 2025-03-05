@@ -68,11 +68,6 @@ function! s:bash()
 
   let s:bash = found[0]
 
-  " Make 8.3 filename via cmd.exe
-  if s:is_win
-    let s:bash = s:winpath(s:bash)
-  endif
-
   return s:bash
 endfunction
 
@@ -81,15 +76,7 @@ function! s:escape_for_bash(path)
     return fzf#shellescape(a:path)
   endif
 
-  if !exists('s:is_linux_like_bash')
-    call system(s:bash . ' -c "ls /mnt/[A-Za-z]"')
-    let s:is_linux_like_bash = v:shell_error == 0
-  endif
-
   let path = substitute(a:path, '\', '/', 'g')
-  if s:is_linux_like_bash
-    let path = substitute(path, '^\([A-Z]\):', '/mnt/\L\1', '')
-  endif
 
   return escape(path, ' ')
 endfunction
@@ -716,7 +703,7 @@ endfunction
 
 function! s:get_git_root(dir)
   let dir = expand('%:p:h')
-  let root = systemlist('git -C ' . dir . ' rev-parse --show-toplevel')[0]
+  let root = systemlist('"git -C ' . dir . ' rev-parse --show-toplevel"')[0]
   return v:shell_error ? '' : (len(a:dir) ? fnamemodify(a:dir, ':p') : root)
 endfunction
 
